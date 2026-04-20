@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Composant audio-player</title>
+    <script type="module" src="./audio-player.js"></script>
+    <style>
+      :root { --bg:#f6f8fb; --card:#fff; --text:#101828; --muted:#475467; --border:#d0d5dd; --accent:#7c3aed; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+      .top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .chip { display: inline-block; padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); text-decoration: none; background: #fff; }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+      h1 { margin: 0 0 8px; }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #fff; }
+      th, td { border: 1px solid #e4e7ec; padding: 9px; text-align: left; vertical-align: top; }
+      th { background: #f9fafb; }
+      code { background: #eef2ff; color: #4338ca; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+    <nav class="top">
+      <a class="chip" href="../">Tous les composants</a>
+      <a class="chip" href="../audio-playlist/">audio-playlist</a>
+      <a class="chip" href="../audio-eq/">audio-eq</a>
+      <a class="chip" href="../audio-visualizer-frequency/">audio-visualizer-frequency</a>
+    </nav>
+    <div class="card">
+    <h1>audio-player</h1>
+    <p>Composant hôte du lecteur, avec gestion du contexte audio partagé.</p>
+    <table>
+      <thead>
+        <tr><th>Attribut / API</th><th>Options</th><th>Défaut</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Tag HTML</td><td><code>&lt;audio-player&gt;</code></td><td>-</td><td>Composant hôte, propriétaire de l’<code>AudioContext</code> partagé.</td></tr>
+        <tr><td>Attributs HTML</td><td><code>src</code>, <code>volume</code>, <code>muted</code>, <code>autoplay</code></td><td>-</td><td>Configuration initiale du lecteur.</td></tr>
+        <tr><td>Propriétés JS</td><td><code>src</code>, <code>volume</code>, <code>muted</code>, <code>currentTime</code>, <code>duration</code>, <code>paused</code>, <code>audioContext</code></td><td>-</td><td>État et accès au contexte audio (read-only).</td></tr>
+        <tr><td>Méthodes publiques</td><td><code>load()</code>, <code>play()</code>, <code>pause()</code>, <code>toggle()</code>, <code>seek()</code>, <code>setEqBands()</code></td><td>-</td><td>API de pilotage du lecteur et de l’EQ.</td></tr>
+        <tr><td>Événements émis</td><td><code>audio:ready</code>, <code>audio:state</code>, <code>audio:track</code>, <code>audio:time</code>, <code>audio:eq</code>, <code>audio:error</code></td><td>-</td><td>Expose les changements d’état et données runtime.</td></tr>
+        <tr><td>Événements consommés</td><td><code>audio:cmd:*</code></td><td>-</td><td>Reçoit les commandes des autres composants via <code>CustomEvent</code>.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="card">
+      <audio-player src="../../../Pokemon.mp3" volume="1"></audio-player>
+    </div>
+    </div>
+  </body>
+</html>
+

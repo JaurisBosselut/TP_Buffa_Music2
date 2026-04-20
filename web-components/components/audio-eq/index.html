@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Composant audio-eq</title>
+    <script type="module">
+      import "../audio-player/audio-player.js";
+      import "./audio-eq.js";
+    </script>
+    <style>
+      :root { --bg:#f6f8fb; --card:#fff; --text:#101828; --muted:#475467; --border:#d0d5dd; --accent:#7c3aed; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+      .top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .chip { display: inline-block; padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); text-decoration: none; background: #fff; }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #fff; }
+      th, td { border: 1px solid #e4e7ec; padding: 9px; text-align: left; vertical-align: top; }
+      th { background: #f9fafb; }
+      code { background: #eef2ff; color: #4338ca; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+    <nav class="top">
+      <a class="chip" href="../">Tous les composants</a>
+      <a class="chip" href="../audio-player/">audio-player</a>
+      <a class="chip" href="../audio-playlist/">audio-playlist</a>
+      <a class="chip" href="../audio-visualizer-frequency/">audio-visualizer-frequency</a>
+    </nav>
+    <div class="card">
+    <h1>audio-eq</h1>
+    <p>Panneau d’égalisation qui envoie les gains vers le lecteur.</p>
+    <table>
+      <thead>
+        <tr><th>Attribut / API</th><th>Options</th><th>Défaut</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Tag HTML</td><td><code>&lt;audio-eq&gt;</code></td><td>-</td><td>Panneau d’égaliseur à bandes.</td></tr>
+        <tr><td>Attributs HTML</td><td><code>frequencies</code>, <code>min-gain</code>, <code>max-gain</code>, <code>step</code></td><td><code>60,170,350,1000,3500,10000</code></td><td>Personnalisation des bandes et du range en dB.</td></tr>
+        <tr><td>Propriétés JS</td><td><code>frequencies</code>, <code>bands</code>, <code>minGain</code>, <code>maxGain</code></td><td>-</td><td>Lecture/écriture de la configuration EQ.</td></tr>
+        <tr><td>Méthode publique</td><td><code>reset()</code></td><td>-</td><td>Réinitialise tous les gains à 0 dB.</td></tr>
+        <tr><td>Événement émis</td><td><code>audio:cmd:setEq</code></td><td>-</td><td>Envoie l’état des bandes vers l’hôte.</td></tr>
+        <tr><td>Événement consommé</td><td><code>audio:eq</code></td><td>-</td><td>Synchronise l’interface avec l’état EQ courant.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="card">
+    <audio-player src="../../../Pokemon.mp3">
+      <audio-eq></audio-eq>
+    </audio-player>
+    </div>
+    </div>
+  </body>
+</html>
+

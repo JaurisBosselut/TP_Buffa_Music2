@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Documentation des composants</title>
+    <style>
+      :root { --bg:#f6f8fb; --card:#fff; --text:#101828; --muted:#475467; --border:#d0d5dd; --accent:#7c3aed; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 40px; }
+      .top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .chip { display: inline-block; padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); text-decoration: none; background: #fff; }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+      h1 { margin: 0 0 6px; font-size: 1.8rem; }
+      p { margin: 0 0 16px; color: var(--muted); }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-decoration: none; color: inherit; }
+      .card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(124,58,237,0.12); }
+      .name { font-weight: 700; margin-bottom: 8px; }
+      code { background: #eef2ff; color: #4338ca; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="top">
+        <a class="chip" href="../../index.html">Accueil projet</a>
+      </nav>
+      <h1>Documentation des Web Components</h1>
+      <p>Choisis un composant pour voir son API et une démo locale.</p>
+      <div class="grid">
+        <a class="card" href="./audio-player/">
+          <div class="name">audio-player</div>
+          <code>&lt;audio-player&gt;</code>
+        </a>
+        <a class="card" href="./audio-playlist/">
+          <div class="name">audio-playlist</div>
+          <code>&lt;audio-playlist&gt;</code>
+        </a>
+        <a class="card" href="./audio-eq/">
+          <div class="name">audio-eq</div>
+          <code>&lt;audio-eq&gt;</code>
+        </a>
+        <a class="card" href="./audio-visualizer-frequency/">
+          <div class="name">audio-visualizer-frequency</div>
+          <code>&lt;audio-visualizer-frequency&gt;</code>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
+

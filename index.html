@@ -1,13 +1,141 @@
-<html>
-    <head>
-    <meta charset="utf-8">
-    <title>Test web component lecteur audio</title>
-    <script src="./components/audioplayer.js" type="module"></script>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
-    </head>
-    <body>
-        <h1>Mon lecteur audio</h1>
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TP — Lecteur audio (Web Components)</title>
 
-        <my-audio-player id="player" src="Pokemon.mp3"></my-audio-player>
-    </body>
+    <style>
+      body {
+        margin: 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      .builder {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 14px 0;
+      }
+      .links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 6px 0 14px;
+      }
+      .links a {
+        padding: 7px 10px;
+        border: 1px solid #d0d5dd;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #344054;
+        background: #fff;
+        font-size: 14px;
+      }
+      .links a:hover {
+        border-color: #7c3aed;
+        color: #7c3aed;
+      }
+      select,
+      button {
+        padding: 8px 10px;
+      }
+      .hint {
+        font-size: 12px;
+        opacity: 0.8;
+        margin: 6px 0 14px;
+      }
+      audio-player {
+        display: block;
+        max-width: 900px;
+      }
+    </style>
+    <script type="module">
+      import "./web-components/components/audio-player/audio-player.js";
+      import "./web-components/components/audio-playlist/audio-playlist.js";
+      import "./web-components/components/audio-eq/audio-eq.js";
+      import "./web-components/components/audio-visualizer-frequency/audio-visualizer-frequency.js";
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const player = document.getElementById("player");
+        const picker = document.getElementById("componentPicker");
+        const addBtn = document.getElementById("addComponentBtn");
+
+        // Son d'exemple (fichier présent à la racine)
+        player.src = "Pokemon.mp3";
+
+        const demoItems = [
+          { title: "Rebel Heart", url: "Rebel_Heart.mp3" },
+          { title: "The Line", url: "The_Line.mp3" },
+          { title: "To Ashes and Blood", url: "To_Ashes_and_Blood.mp3" },
+          { title: "Ma Meilleure Ennemie", url: "Ma_Meilleure_Ennemie.mp3" },
+
+          { title: "Pokemon", url: "Pokemon.mp3" },
+          { title: "Pokemon 1", url: "Pokemon1.mp3" },
+          { title: "Pokemon 2", url: "Pokemon2.mp3" },
+          { title: "Pokemon 3", url: "pokemon3.mp3" },
+          { title: "Pokemon 4", url: "pokemon4.mp3" },
+
+          { title: "Fairytale (Alexander Rybak)", url: "Fairytale (Alexander Rybak).mp3" },
+          { title: "End Of Beginning (Djo)", url: "End Of Beginning (Djo).mp3" },
+          { title: "Die With A Smile (Lady Gaga, Bruno Mars)", url: "Die With A Smile (Lady Gaga, Bruno Mars).mp3" },
+          { title: "Daylight (David Kushner)", url: "Daylight (David Kushner).mp3" },
+          { title: "Human (Rag'n'Bone Man)", url: "Human (Rag'n'Bone Man).mp3" },
+          { title: "Believer (Imagine Dragons)", url: "Believer (Imagine Dragons).mp3" },
+          { title: "Natural (Imagine Dragons)", url: "Natural (Imagine Dragons).mp3" },
+          { title: "Enemy (Imagine Dragons)", url: "Enemy (Imagine Dragons).mp3" },
+          { title: "God knows... The Melancholy of Haruhi Suzumiya", url: "God knows... The Melancholy of Haruhi Suzumiya.mp3" },
+        ];
+
+        const FACTORY = {
+          "audio-playlist": () => {
+            const el = document.createElement("audio-playlist");
+            el.setAttribute("autoplay", "");
+            el.items = demoItems;
+            return el;
+          },
+          "audio-eq": () => document.createElement("audio-eq"),
+          "audio-visualizer-frequency": () => {
+            const el = document.createElement("audio-visualizer-frequency");
+            el.setAttribute("fft-size", "2048");
+            el.setAttribute("bar-color", "#111");
+            el.setAttribute("bg-color", "#fff");
+            return el;
+          },
+        };
+
+        addBtn.addEventListener("click", () => {
+          const tag = picker.value;
+          const create = FACTORY[tag];
+          if (!create) return;
+
+          // IMPORTANT: on ajoute dans <audio-player> (événements qui remontent).
+          player.appendChild(create());
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Lecteur audio</h1>
+    <div class="links">
+      <a href="./web-components/components/index.html">Documentation des composants</a>
+    </div>
+
+    <div class="builder">
+      <select id="componentPicker">
+        <option value="audio-playlist">&lt;audio-playlist&gt;</option>
+        <option value="audio-eq">&lt;audio-eq&gt;</option>
+        <option value="audio-visualizer-frequency">&lt;audio-visualizer-frequency&gt;</option>
+      </select>
+      <button id="addComponentBtn" type="button">Ajouter Web Component</button>
+    </div>
+
+    <div class="hint">
+      La page démarre “vide” (juste Play/Mute + audio). Ajoute ensuite playlist / EQ / visualiseur via le bouton.
+    </div>
+
+    <!-- Page minimale: uniquement le lecteur (Play/Mute/seek/volume sont dans <audio-player>) -->
+    <audio-player id="player" volume="1"></audio-player>
+  </body>
 </html>
