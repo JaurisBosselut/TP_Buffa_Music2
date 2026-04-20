@@ -39,14 +39,14 @@
       <tbody>
         <tr><td>Tag HTML</td><td><code>&lt;audio-player&gt;</code></td><td>-</td><td>Composant hôte, propriétaire de l’<code>AudioContext</code> partagé.</td></tr>
         <tr><td>Attributs HTML</td><td><code>src</code>, <code>volume</code>, <code>muted</code>, <code>autoplay</code></td><td>-</td><td>Configuration initiale du lecteur.</td></tr>
-        <tr><td>Propriétés JS</td><td><code>src</code>, <code>volume</code>, <code>muted</code>, <code>currentTime</code>, <code>duration</code>, <code>paused</code>, <code>audioContext</code></td><td>-</td><td>État et accès au contexte audio (read-only).</td></tr>
-        <tr><td>Méthodes publiques</td><td><code>load()</code>, <code>play()</code>, <code>pause()</code>, <code>toggle()</code>, <code>seek()</code>, <code>setEqBands()</code></td><td>-</td><td>API de pilotage du lecteur et de l’EQ.</td></tr>
-        <tr><td>Événements émis</td><td><code>audio:ready</code>, <code>audio:state</code>, <code>audio:track</code>, <code>audio:time</code>, <code>audio:eq</code>, <code>audio:error</code></td><td>-</td><td>Expose les changements d’état et données runtime.</td></tr>
+        <tr><td>Propriétés JS</td><td><code>src</code>, <code>volume</code>, <code>muted</code>, <code>autoplay</code>, <code>currentTime</code>, <code>duration</code>, <code>paused</code>, <code>audioContext</code></td><td>-</td><td>État et accès au contexte audio (read-only).</td></tr>
+        <tr><td>Méthodes publiques</td><td><code>load()</code>, <code>play()</code>, <code>pause()</code>, <code>toggle()</code>, <code>seek()</code>, <code>setEqBands()</code>, <code>getEqBands()</code></td><td>-</td><td>API de pilotage du lecteur et de l’EQ.</td></tr>
+        <tr><td>Événements émis</td><td><code>audio:ready</code>, <code>audio:state</code>, <code>audio:track</code>, <code>audio:time</code>, <code>audio:eq</code>, <code>audio:ended</code>, <code>audio:error</code></td><td>-</td><td>Expose les changements d’état et données runtime.</td></tr>
         <tr><td>Événements consommés</td><td><code>audio:cmd:*</code></td><td>-</td><td>Reçoit les commandes des autres composants via <code>CustomEvent</code>.</td></tr>
       </tbody>
     </table></div>
     <div class="card">
-      <audio-player src="../../../Pokemon.mp3" volume="1"></audio-player>
+      <audio-player src="../../../Rebel_Heart.mp3" volume="1"></audio-player>
     </div>
     </div>
   </body>

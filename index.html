@@ -60,9 +60,20 @@
         const player = document.getElementById("player");
         const picker = document.getElementById("componentPicker");
         const addBtn = document.getElementById("addComponentBtn");
+        const externalUrlInput = document.getElementById("externalUrl");
+        const externalTagInput = document.getElementById("externalTag");
+        const addExternalBtn = document.getElementById("addExternalBtn");
+        const status = document.getElementById("externalStatus");
+
+        const loadedModules = new Map();
+        const registeredComponentKeys = new Set();
+        const tagPrimarySource = new Map();
+        const componentKeyToRuntimeTag = new Map();
+        const declaredTagsByUrl = new Map();
+        const PLAYLIST_EVENTS = ["track-select", "playlist:select", "trackchange"];
 
         // Son d'exemple (fichier présent à la racine)
-        player.src = "Pokemon.mp3";
+        player.src = "Rebel_Heart.mp3";
 
         const demoItems = [
           { title: "Rebel Heart", url: "Rebel_Heart.mp3" },
@@ -112,6 +123,185 @@
           // IMPORTANT: on ajoute dans <audio-player> (événements qui remontent).
           player.appendChild(create());
         });
+
+        function setStatus(message, isError = false) {
+          status.textContent = message;
+          status.style.color = isError ? "#b42318" : "#175cd3";
+        }
+
+        function bridgeExternalPlaylistEvent(event) {
+          const detail = event?.detail || {};
+          const url = detail.url || detail.src;
+          if (!url) return;
+
+          player.dispatchEvent(
+            new CustomEvent("audio:cmd:selectTrack", {
+              detail: {
+                url,
+                title: detail.title || detail.name || "",
+                autoplay: detail.autoplay ?? true,
+              },
+              bubbles: true,
+              composed: true,
+            })
+          );
+        }
+
+        function setupExternalPlaylistBridge() {
+          for (const eventName of PLAYLIST_EVENTS) {
+            // Capture pour intercepter aussi les événements provenant des shadow DOM externes.
+            player.addEventListener(eventName, bridgeExternalPlaylistEvent, true);
+          }
+        }
+
+        async function ensureComponentRegistered(tag, url) {
+          const normalizedTag = String(tag || "").toLowerCase();
+          const normalizedUrl = new URL(url, window.location.href).toString();
+          let declaredTags = declaredTagsByUrl.get(normalizedUrl);
+
+          if (!declaredTags) {
+            try {
+              const response = await fetch(normalizedUrl);
+              if (response.ok) {
+                const sourceCode = await response.text();
+                const matches = sourceCode.matchAll(/customElements\.define\(\s*['"`]([a-z0-9-]+)['"`]/gi);
+                declaredTags = [...new Set(Array.from(matches, (m) => String(m[1]).toLowerCase()))];
+              }
+            } catch {
+              declaredTags = [];
+            }
+            if (!declaredTags) declaredTags = [];
+            declaredTagsByUrl.set(normalizedUrl, declaredTags);
+          }
+
+          const requestedTagExistsInModule = declaredTags.includes(normalizedTag);
+          const effectiveTag = requestedTagExistsInModule
+            ? normalizedTag
+            : (declaredTags[0] || normalizedTag);
+          const componentKey = `${effectiveTag}::${normalizedUrl}`;
+
+          const buildAliasTag = (baseTag, sourceUrl) => {
+            const cleanBase = baseTag.replace(/[^a-z0-9-]/g, "-") || "wc-component";
+            let hash = 0;
+            for (let i = 0; i < sourceUrl.length; i++) {
+              hash = ((hash << 5) - hash) + sourceUrl.charCodeAt(i);
+              hash |= 0;
+            }
+            return `${cleanBase}-src-${Math.abs(hash).toString(36)}`;
+          };
+
+          const importWithAliasedTag = async (sourceUrl, sourceTag, aliasTag) => {
+            const response = await fetch(sourceUrl);
+            if (!response.ok) {
+              throw new Error(`Impossible de charger ${sourceUrl}`);
+            }
+
+            const sourceCode = await response.text();
+            const defineRegex = new RegExp(`customElements\\.define\\(\\s*(['"])${sourceTag}\\1`, "i");
+            if (!defineRegex.test(sourceCode)) {
+              throw new Error(`Alias impossible: ${sourceUrl} ne declare pas explicitement <${sourceTag}>.`);
+            }
+
+            const aliasedCode = sourceCode.replace(
+              defineRegex,
+              `customElements.define('${aliasTag}'`
+            );
+            const blobUrl = URL.createObjectURL(new Blob([aliasedCode], { type: "text/javascript" }));
+            try {
+              await import(blobUrl);
+            } finally {
+              URL.revokeObjectURL(blobUrl);
+            }
+          };
+
+          if (registeredComponentKeys.has(componentKey)) {
+            return { runtimeTag: componentKeyToRuntimeTag.get(componentKey) || normalizedTag };
+          }
+
+          const primarySource = tagPrimarySource.get(effectiveTag);
+
+          if (customElements.get(effectiveTag) && primarySource && primarySource !== normalizedUrl) {
+            const aliasTag = buildAliasTag(effectiveTag, normalizedUrl);
+            if (!customElements.get(aliasTag)) {
+              await importWithAliasedTag(normalizedUrl, effectiveTag, aliasTag);
+            }
+            registeredComponentKeys.add(componentKey);
+            componentKeyToRuntimeTag.set(componentKey, aliasTag);
+            return { runtimeTag: aliasTag };
+          }
+
+          if (customElements.get(effectiveTag)) {
+            if (!primarySource) {
+              tagPrimarySource.set(effectiveTag, normalizedUrl);
+            }
+            registeredComponentKeys.add(componentKey);
+            componentKeyToRuntimeTag.set(componentKey, effectiveTag);
+            return { runtimeTag: effectiveTag };
+          }
+
+          if (!loadedModules.has(normalizedUrl)) {
+            loadedModules.set(normalizedUrl, import(normalizedUrl));
+          }
+
+          try {
+            await loadedModules.get(normalizedUrl);
+            tagPrimarySource.set(effectiveTag, normalizedUrl);
+            registeredComponentKeys.add(componentKey);
+            componentKeyToRuntimeTag.set(componentKey, effectiveTag);
+            return { runtimeTag: effectiveTag };
+          } catch (error) {
+            if (customElements.get(effectiveTag) && /already been used/i.test(String(error?.message || ""))) {
+              if (!tagPrimarySource.get(effectiveTag)) {
+                tagPrimarySource.set(effectiveTag, normalizedUrl);
+              }
+              registeredComponentKeys.add(componentKey);
+              componentKeyToRuntimeTag.set(componentKey, effectiveTag);
+              return { runtimeTag: effectiveTag };
+            }
+
+            loadedModules.delete(normalizedUrl);
+            if (!customElements.get(effectiveTag)) {
+              throw error;
+            }
+
+            registeredComponentKeys.add(componentKey);
+            componentKeyToRuntimeTag.set(componentKey, effectiveTag);
+            return { runtimeTag: effectiveTag };
+          }
+        }
+
+        addExternalBtn.addEventListener("click", async () => {
+          const url = externalUrlInput.value.trim();
+          const tag = externalTagInput.value.trim().toLowerCase();
+
+          if (!url || !tag) {
+            setStatus("Renseigne l'URL du fichier .js et le tag du composant.", true);
+            return;
+          }
+
+          if (!tag.includes("-")) {
+            setStatus("Le tag doit contenir un tiret (ex: my-component).", true);
+            return;
+          }
+
+          try {
+            const registration = await ensureComponentRegistered(tag, url);
+            const runtimeTag = registration?.runtimeTag || tag;
+            const element = document.createElement(runtimeTag);
+            player.appendChild(element);
+            if (runtimeTag !== tag) {
+              setStatus(`Tag saisi <${tag}> non trouve dans le module. Composant ajoute avec <${runtimeTag}>.`);
+            } else {
+              setStatus(`Composant <${runtimeTag}> ajoute avec succes.`);
+            }
+            externalUrlInput.value = "";
+            externalTagInput.value = "";
+          } catch (error) {
+            setStatus(error?.message || `Impossible d'ajouter <${tag}> depuis ${url}.`, true);
+          }
+        });
+
+        setupExternalPlaylistBridge();
       });
     </script>
   </head>
@@ -130,6 +320,12 @@
       </select>
       <button id="addComponentBtn" type="button">Ajouter Web Component</button>
     </div>
+    <div class="builder">
+      <input id="externalUrl" type="url" placeholder="https://.../mon-component.js" style="min-width: 320px" />
+      <input id="externalTag" type="text" placeholder="mon-component" />
+      <button id="addExternalBtn" type="button">Ajouter composant externe</button>
+    </div>
+    <div id="externalStatus" class="hint"></div>
 
     <div class="hint">
       La page démarre “vide” (juste Play/Mute + audio). Ajoute ensuite playlist / EQ / visualiseur via le bouton.
